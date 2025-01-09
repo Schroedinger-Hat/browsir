@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	cnf "github.com/404answernotfound/browsir/config"
+	browsir "github.com/404answernotfound/browsir/internal"
 	"github.com/404answernotfound/browsir/utils"
 )
 
@@ -15,6 +16,18 @@ func main() {
 	localShortcuts := utils.LoadLocalShortcuts()
 
 	args := os.Args[1:]
+
+	// Check for restricted keywords before parsing flags and running profiles
+	restrictedKeywords := []string{"add-link", "add-shortcut", "rm-link", "search", "list", "preview"}
+
+	for _, keyword := range restrictedKeywords {
+		if strings.Contains(args[0], keyword) {
+			mainCmd := args[0]
+			otherArgs := args[1:]
+			browsir.RunCommand(mainCmd, otherArgs)
+			os.Exit(0)
+		}
+	}
 
 	primitiveFlags := []string{"-v", "--version", "-h", "--help", "-ls", "--list-shortcuts", "-p", "--profiles"}
 	var shouldExit bool
