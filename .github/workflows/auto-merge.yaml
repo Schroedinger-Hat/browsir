@@ -1,0 +1,40 @@
+name: Auto Rebase and Merge
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+  pull_request_review:
+    types: [submitted]
+  status: {}
+
+jobs:
+  auto-rebase:
+    name: Auto Rebase
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+      
+      - name: Auto Rebase
+        uses: cirrus-actions/rebase@1.8
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  auto-merge:
+    name: Auto Merge
+    needs: [auto-rebase]
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.mergeable == true
+    steps:
+      - name: Auto Merge
+        uses: ridedott/merge-me-action@v2
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MERGE_METHOD: SQUASH
+          PRESET: 'DEPENDABOT_MINOR' 
