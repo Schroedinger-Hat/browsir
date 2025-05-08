@@ -76,3 +76,19 @@ func FindConfigFile() (string, error) {
 
 	return configPath, nil
 }
+
+func GetConfigBase() (string, error) {
+	configHome := os.Getenv("XDG_CONFIG_HOME")
+	if configHome == "" {
+		configHome = os.Getenv("HOME") + CONFIG_PATH
+	} else {
+		configHome = configHome + CONFIG_PATH
+	}
+
+	_, err := os.Stat(configHome)
+	if err != nil {
+		return "", fmt.Errorf("config home not found, %v", err)
+	}
+
+	return configHome, nil
+}

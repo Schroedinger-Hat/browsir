@@ -18,7 +18,7 @@ import (
 func LoadLocalShortcuts() map[string]string {
 	shortcuts := make(map[string]string)
 
-	base, err := config.FindConfigFile()
+	base, err := config.GetConfigBase()
 	if err != nil {
 		return shortcuts
 	}
@@ -55,7 +55,7 @@ func LoadLinks() map[string]string {
 	var links = make(map[string]string)
 	var linksPath string
 
-	base, err := config.FindConfigFile()
+	base, err := config.GetConfigBase()
 	if err != nil {
 		return links
 	}
@@ -89,7 +89,7 @@ func LoadLinks() map[string]string {
 
 func SaveLink(link string, categories string) error {
 
-	base, err := config.FindConfigFile()
+	base, err := config.GetConfigBase()
 	if err != nil {
 		return err
 	}
@@ -120,7 +120,7 @@ func SaveLink(link string, categories string) error {
 }
 
 func SaveLocalShortcut(shortcut, url string) error {
-	base, err := config.FindConfigFile()
+	base, err := config.GetConfigBase()
 	if err != nil {
 		return err
 	}
@@ -143,7 +143,7 @@ func SaveLocalShortcut(shortcut, url string) error {
 }
 
 func RemoveLocalShortcut(shortcut string) error {
-	base, err := config.FindConfigFile()
+	base, err := config.GetConfigBase()
 	if err != nil {
 		return err
 	}
