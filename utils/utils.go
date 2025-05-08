@@ -120,14 +120,12 @@ func SaveLink(link string, categories string) error {
 }
 
 func SaveLocalShortcut(shortcut, url string) error {
-
-	// First try system config directory
-	shortcutsPath := "/etc/browsir/shortcuts"
-
 	base, err := config.FindConfigFile()
 	if err != nil {
-		return shortcuts
+		return err
 	}
+
+	shortcutsPath := base + "/shortcuts"
 
 	f, err := os.OpenFile(shortcutsPath, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
 	CheckDuplicates(f, url, 1, "shortcut", "=")
@@ -141,29 +139,16 @@ func SaveLocalShortcut(shortcut, url string) error {
 		return err
 	}
 
-	// Finally try current directory
-	f, err = os.OpenFile("shortcuts", os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
-	CheckDuplicates(f, url, 1, "shortcut", "=")
-
-	if err == nil {
-		defer f.Close()
-		_, err = fmt.Fprintf(f, "%s=%s\n", shortcut, url)
-		if err == nil {
-			fmt.Printf("Shortcut %s correctly saved", shortcut)
-		}
-		return err
-	}
-
 	return err
 }
 
 func RemoveLocalShortcut(shortcut string) error {
-	shortcutsPath := "/etc/browsir/shortcuts"
-
 	base, err := config.FindConfigFile()
 	if err != nil {
-		return shortcuts
+		return err
 	}
+
+	shortcutsPath := base + "/shortcuts"
 
 	// First open shortcut file
 	f, err := os.OpenFile(shortcutsPath, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
