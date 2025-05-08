@@ -18,8 +18,13 @@ import (
 func LoadLocalShortcuts() map[string]string {
 	shortcuts := make(map[string]string)
 
+	base, err := config.FindConfigFile()
+	if err != nil {
+		return shortcuts
+	}
+
 	// First check system config directory
-	shortcutsPath := "/etc/browsir/shortcuts"
+	shortcutsPath := base + "/shortcuts"
 
 	// Finally check current directory
 	if _, err := os.Stat(shortcutsPath); os.IsNotExist(err) {
@@ -50,8 +55,13 @@ func LoadLinks() map[string]string {
 	var links = make(map[string]string)
 	var linksPath string
 
+	base, err := config.FindConfigFile()
+	if err != nil {
+		return links
+	}
+
 	// First check system config directory
-	linksPath = "/etc/browsir/links"
+	linksPath = base + "/links"
 
 	if _, err := os.Stat(linksPath); os.IsNotExist(err) {
 		linksPath = "links"
@@ -79,7 +89,12 @@ func LoadLinks() map[string]string {
 
 func SaveLink(link string, categories string) error {
 
-	linksPath := "/etc/browsir/links"
+	base, err := config.FindConfigFile()
+	if err != nil {
+		return err
+	}
+
+	linksPath := base + "/links"
 
 	categoriesSlice := strings.Split(categories, ",")
 	var categoriesToString string
@@ -100,14 +115,6 @@ func SaveLink(link string, categories string) error {
 		return err
 	}
 
-	f, err = os.OpenFile("links", os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
-	CheckDuplicates(f, link, 0, "link", "|")
-
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
 	_, err = fmt.Fprintf(f, "%s|%s\n", link, categoriesToString)
 	return err
 }
@@ -116,6 +123,11 @@ func SaveLocalShortcut(shortcut, url string) error {
 
 	// First try system config directory
 	shortcutsPath := "/etc/browsir/shortcuts"
+
+	base, err := config.FindConfigFile()
+	if err != nil {
+		return shortcuts
+	}
 
 	f, err := os.OpenFile(shortcutsPath, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
 	CheckDuplicates(f, url, 1, "shortcut", "=")
@@ -148,6 +160,11 @@ func SaveLocalShortcut(shortcut, url string) error {
 func RemoveLocalShortcut(shortcut string) error {
 	shortcutsPath := "/etc/browsir/shortcuts"
 
+	base, err := config.FindConfigFile()
+	if err != nil {
+		return shortcuts
+	}
+
 	// First open shortcut file
 	f, err := os.OpenFile(shortcutsPath, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
@@ -162,15 +179,15 @@ func RemoveLocalShortcut(shortcut string) error {
 		return err
 	}
 	defer tempFile.Close()
-	
+
 	scanner := bufio.NewScanner(f)
 	writer := bufio.NewWriter(tempFile)
-	
+
 	// Loop the shortcut file and copy in the temp only the ones that don't match the requested one
 	found := false
 	for scanner.Scan() {
 		line := scanner.Text()
-		if strings.HasPrefix(line, shortcut + "=") {
+		if strings.HasPrefix(line, shortcut+"=") {
 			found = true
 			continue
 		}
@@ -184,9 +201,9 @@ func RemoveLocalShortcut(shortcut string) error {
 	if err := scanner.Err(); err != nil {
 		return err
 	}
-	
+
 	writer.Flush()
-	
+
 	// Replace the temp file as the new shortcut file
 	if err := os.Rename(tempFilePath, shortcutsPath); err != nil {
 		return err
@@ -437,7 +454,7 @@ func FindHtmlNode(doc *goquery.Document, search []string) []string {
 	return values
 }
 
-func CheckInputArgs (currentArgs, expectedArgs int) error {
+func CheckInputArgs(currentArgs, expectedArgs int) error {
 	if currentArgs < expectedArgs {
 		fmt.Printf("You provided %d arguments, while %d are needed.\nPlease, see --help flag to check usage for add command\n", currentArgs, expectedArgs)
 		return errors.New("not enough arguments")

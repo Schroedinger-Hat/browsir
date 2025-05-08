@@ -21,8 +21,10 @@ type Profile struct {
 	Description string `yaml:"description"`
 }
 
+const CONFIG_PATH = "/.config/browsir"
+
 func LoadConfig() (Config, error) {
-	configPath, err := findConfigFile()
+	configPath, err := FindConfigFile()
 	if err != nil {
 		return Config{}, errors.New("config file not found")
 	}
@@ -58,12 +60,14 @@ func LoadConfig() (Config, error) {
 	return config, nil
 }
 
-func findConfigFile() (string, error) {
+func FindConfigFile() (string, error) {
 	configHome := os.Getenv("XDG_CONFIG_HOME")
 	if configHome == "" {
-		configHome = os.Getenv("HOME") + "/.config"
+		configHome = os.Getenv("HOME") + CONFIG_PATH
+	} else {
+		configHome = configHome + CONFIG_PATH
 	}
-	configPath := configHome + "/browsir/config.yml"
+	configPath := configHome + "/config.yml"
 
 	_, err := os.Stat(configPath)
 	if err != nil {
