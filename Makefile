@@ -1,7 +1,7 @@
 .PHONY: build clean install
 
 BINARY_NAME=browsir
-INSTALL_PATH=/usr/local/bin
+INSTALL_PATH=$(HOME)/bin
 CONFIG_PATH=$(HOME)/.config/browsir
 
 dev:

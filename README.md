@@ -39,11 +39,7 @@ This will force you to enter all the previously saved informations again, so be 
 make install
 ```
 
-This will build the binary and install it to `/usr/local/bin`
-
-It might prompt you for the password. This is because we are trying to write files in locations like `/usr/`.
-
-You do have the source code tho, so you can either check that everything is nice _or_ you can change the installation folders yourself in the Makefile!
+This will build the binary and install it to `$HOME/bin`
 
 3. Verify the installation:
    ```bash
@@ -63,9 +59,7 @@ make build
 make update
 ```
 
-This will build the binary and install it to `/usr/local/bin`
-
-It might prompt you for the password. This is because we are trying to write files in locations like `/usr/`.
+This will build the binary and install it to `$HOME/bin`
 
 Verify the installation:
 ```bash
