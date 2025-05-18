@@ -293,9 +293,10 @@ func PrintUsage(profiles []config.Profile, shortcuts map[string]string, localSho
 	fmt.Println("   browsir add shortcut <shortcut> <url>	# Add a local shortcut, do not include http:// or https://")
 	fmt.Println("   browsir rm link <link>					# Remove a link")
 	fmt.Println("   browsir rm shortcut <shortcut>			# Remove a local shortcut")
-	fmt.Println("   browsir list links						# List all links")
-	fmt.Println("   browsir list all						# List all links and categories")
-	fmt.Println("   browsir preview <link>					# Preview a link")
+	fmt.Println("   browsir list                   \t\t\t# List all links and shortcuts")
+	fmt.Println("   browsir list links             \t\t\t# List only links")
+	fmt.Println("   browsir list shortcuts         \t\t\t# List only shortcuts")
+	fmt.Println("   browsir preview <link>         \t\t\t# Preview a link")
 }
 
 func PrintProfiles(profiles []config.Profile) {
