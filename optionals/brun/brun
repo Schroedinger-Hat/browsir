@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# This script is used to select a profile and site from the browsir browser
+# and open it in the default browser.
+# It uses fzf or wofi to display the list of profiles and sites.
+# It is designed to be run in a terminal or in a script.
+# It requires the browsir browser to be installed and available in the PATH.
+# It also requires fzf or wofi to be installed and available in the PATH.
+# Usage: ./brun [--no-tty]
+# Make sure to give execute permission: chmod +x brun
+# Place this script in ~/.local/bin/brun and make it executable.
+
+runner="$(command -v fzf)"
+
+# if is run with --no-tty option or in a non-tty environment, use wofi
+if [ -n "$1" ] && [ "$1" = "--no-tty" ] || [ "$TERM" = "dumb" ]; then
+  runner="$(command -v wofi)"
+fi
+
+brun() {
+  profile=$(browsir --profiles | tail -n +3 | awk '{print $1}' | "$runner")
+  if [[ -n "$profile" ]]; then
+    site=$(browsir -ls | awk '{print $1}' | "$runner")
+    if [[ -n "$site" ]]; then
+      browsir "$profile" "$site"
+    else
+      echo "No site selected."
+    fi
+  else
+    echo "No profile selected."
+  fi
+}
+
+brun
