@@ -21,7 +21,16 @@ type ICommand interface {
 	preview(args []string)
 }
 
-type Command struct{}
+type Command struct {
+	linkLoader LinkLoader
+}
+
+// NewCommand creates a new Command with the default RealLinkLoader
+func NewCommand() *Command {
+	return &Command{
+		linkLoader: &RealLinkLoader{},
+	}
+}
 
 func (c Command) add(args []string) error {
 	switch args[0] {
@@ -79,14 +88,52 @@ func (c Command) remove(args []string) error {
 }
 
 func (c Command) list(args []string) error {
-	links, err := utils.LoadLinks()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "There was an issue loading your links configuration, %v\n", err)
-		os.Exit(0)
+	if len(args) == 0 || (len(args) > 0 && (args[0] == "all")) {
+		// List all links and all shortcuts
+		links, err := c.linkLoader.LoadLinks()
+		if err == nil {
+			fmt.Println("Links:")
+			for link, categories := range links {
+				fmt.Printf("  %s - Categories: %s\n", link, categories)
+			}
+		} else {
+			fmt.Fprintf(os.Stderr, "There was an issue loading your links configuration, %v\n", err)
+		}
+		shortcuts, err := c.linkLoader.LoadLocalShortcuts()
+		if err == nil {
+			fmt.Println("Shortcuts:")
+			utils.PrintLocalShortcuts(shortcuts)
+		} else {
+			fmt.Fprintf(os.Stderr, "There was an issue loading your shortcuts configuration, %v\n", err)
+		}
+		return nil
 	}
-	for link, categories := range links {
-		fmt.Printf("Link: %s - Categories: %s\n", link, categories)
+
+	if args[0] == "links" {
+		links, err := c.linkLoader.LoadLinks()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "There was an issue loading your links configuration, %v\n", err)
+			return nil
+		}
+		fmt.Println("Links:")
+		for link, categories := range links {
+			fmt.Printf("  %s - Categories: %s\n", link, categories)
+		}
+		return nil
 	}
+
+	if args[0] == "shortcuts" {
+		shortcuts, err := c.linkLoader.LoadLocalShortcuts()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "There was an issue loading your shortcuts configuration, %v\n", err)
+			return nil
+		}
+		fmt.Println("Shortcuts:")
+		utils.PrintLocalShortcuts(shortcuts)
+		return nil
+	}
+
+	fmt.Fprintf(os.Stderr, "Unknown argument for list: %s\n", args[0])
 	return nil
 }
 
@@ -132,7 +179,7 @@ func (c Command) preview(args []string) error {
 }
 
 func RunCommand(mainCmd string, otherArgs []string) error {
-	command := &Command{}
+	command := NewCommand()
 	var err error
 
 	switch mainCmd {
