@@ -21,7 +21,16 @@ type ICommand interface {
 	preview(args []string)
 }
 
-type Command struct{}
+type Command struct {
+	linkLoader LinkLoader
+}
+
+// NewCommand creates a new Command with the default RealLinkLoader
+func NewCommand() *Command {
+	return &Command{
+		linkLoader: &RealLinkLoader{},
+	}
+}
 
 func (c Command) add(args []string) error {
 	switch args[0] {
@@ -81,7 +90,7 @@ func (c Command) remove(args []string) error {
 func (c Command) list(args []string) error {
 	if len(args) == 0 || (len(args) > 0 && (args[0] == "all")) {
 		// List all links and all shortcuts
-		links, err := utils.LoadLinks()
+		links, err := c.linkLoader.LoadLinks()
 		if err == nil {
 			fmt.Println("Links:")
 			for link, categories := range links {
@@ -90,7 +99,7 @@ func (c Command) list(args []string) error {
 		} else {
 			fmt.Fprintf(os.Stderr, "There was an issue loading your links configuration, %v\n", err)
 		}
-		shortcuts, err := utils.LoadLocalShortcuts()
+		shortcuts, err := c.linkLoader.LoadLocalShortcuts()
 		if err == nil {
 			fmt.Println("Shortcuts:")
 			utils.PrintLocalShortcuts(shortcuts)
@@ -101,7 +110,7 @@ func (c Command) list(args []string) error {
 	}
 
 	if args[0] == "links" {
-		links, err := utils.LoadLinks()
+		links, err := c.linkLoader.LoadLinks()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "There was an issue loading your links configuration, %v\n", err)
 			return nil
@@ -114,7 +123,7 @@ func (c Command) list(args []string) error {
 	}
 
 	if args[0] == "shortcuts" {
-		shortcuts, err := utils.LoadLocalShortcuts()
+		shortcuts, err := c.linkLoader.LoadLocalShortcuts()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "There was an issue loading your shortcuts configuration, %v\n", err)
 			return nil
@@ -170,7 +179,7 @@ func (c Command) preview(args []string) error {
 }
 
 func RunCommand(mainCmd string, otherArgs []string) error {
-	command := &Command{}
+	command := NewCommand()
 	var err error
 
 	switch mainCmd {
